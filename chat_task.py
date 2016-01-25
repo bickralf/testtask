@@ -29,13 +29,13 @@ else:
 
 class MyChatTool(sleekxmpp.ClientXMPP):
 
-    def __init__(self, jid, password, recipient, message, show_unread_messages, continuous):
+    def __init__(self, jid, password, recipient, message_content, show_unread_messages, continuous):
         """
         Arguments:
             jid - Jabber ID to use
             password - Password that belongs to the jid
             recipient - Jabber ID of recipient
-            message - message content
+            message_content - message content
             show_unread_messages - if set only shows unread messages of jid
             continuous - if set program runs continuously
         """
@@ -43,7 +43,7 @@ class MyChatTool(sleekxmpp.ClientXMPP):
         sleekxmpp.ClientXMPP.__init__(self, jid, password)
         # Set message content and recipient.
         self.recipient = recipient
-        self.msg = message
+        self.msg_content = message_content
         # Set switches
         self.show_unread_messages = show_unread_messages
         self.continuous = continuous
@@ -62,7 +62,7 @@ class MyChatTool(sleekxmpp.ClientXMPP):
         self.send_presence()
         self.get_roster()
         if self.show_unread_messages is False:
-            self.send_message(mto=self.recipient, mbody=self.msg, mtype='chat')
+            self.send_message(mto=self.recipient, mbody=self.msg_content, mtype='chat')
             if self.continuous is False:
                 self.disconnect(wait=True)
 
@@ -72,10 +72,12 @@ class MyChatTool(sleekxmpp.ClientXMPP):
         Disconnects if continuous is not set, otherwise prints all messages
         as long as the program runs.
         """
+        from pprint import pprint
+        pprint(vars(self))
         if msg['type'] in ('chat', 'normal'):
             print("Message: " + str(msg['body']) + "\nsent from " + str(msg['from']))
         if self.continuous is False:
-            if self.event_queue.qsize() <= 1:
+            if self.event_queue.qsize() == 0:
                 self.disconnect(wait=True)
 
 if __name__ == '__main__':
