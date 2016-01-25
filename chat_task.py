@@ -3,7 +3,7 @@
 import sys
 import logging
 import getpass
-from optparse import OptionParser
+import argparse
 
 import sleekxmpp
 
@@ -17,12 +17,12 @@ else:
 
 class SendMsg(sleekxmpp.ClientXMPP):
 
-    def __init__(self, jid, password, recipient, message, read):
+    def __init__(self, jid, password, recipient, message, show_messages):
         sleekxmpp.ClientXMPP.__init__(self, jid, password)
 
         self.recipient = recipient
         self.msg = message
-        self.read = read
+        self.show_messages = show_messages
 
         self.add_event_handler("session_start", self.start)
         self.add_event_handler("message", self.message)
@@ -30,43 +30,42 @@ class SendMsg(sleekxmpp.ClientXMPP):
     def start(self, event):
         self.send_presence()
         self.get_roster()
-        if self.read is False:
+        if self.show_messages is False:
             self.send_message(mto=self.recipient, mbody=self.msg, mtype='chat')
 
-#        self.disconnect(wait=True)
-
     def message(self, msg):
+        print(str(msg))
         if msg['type'] in ('chat', 'normal'):
-            logging.info("Message: " + str(msg['body']) + "\nsent from " + str(msg['from']))
+            print("Message: " + str(msg['body']) + "\nsent from " + str(msg['from']))
 
 if __name__ == '__main__':
 
-    optp = OptionParser()
+    parser = argparse.ArgumentParser()
 
-    optp.add_option('-q', '--quiet', help='set logging to ERROR', action='store_const', dest='loglevel', const=logging.ERROR, default=logging.INFO)
-    optp.add_option('-d', '--debug', help='set logging to DEBUG', action='store_const', dest='loglevel', const=logging.DEBUG, default=logging.INFO)
-    optp.add_option('-v', '--verbose', help='set logging to VERBOSE', action='store_const', dest='loglevel', const=5, default=logging.INFO)
+    parser.add_argument('-s', '--show_messages', help='only show messages', action='store_const', dest='show_messages', const=True, default=False)
+    parser.add_argument('-d', '--debug', help='set logging to DEBUG', action='store_const', dest='loglevel', const=logging.DEBUG, default=logging.INFO)
+    parser.add_argument('-v', '--verbose', help='set logging to VERBOSE', action='store_const', dest='loglevel', const=5, default=logging.INFO)
 
-    optp.add_option("-j", "--jid", dest="jid", help="JID to use")
-    optp.add_option("-p", "--password", dest="password", help="password to use")
-    optp.add_option("-t", "--to", dest="to", help="JID to send message to")
-    optp.add_option("-m", "--message", dest="message", help="message to send")
-    optp.add_option("-r", "--read_messages", dest="read_messages", help="read incoming messages")
+    parser.add_argument("-j", "--jid", dest="jid", help="JID to use")
+    parser.add_argument("-p", "--password", dest="password", help="password to use")
+    parser.add_argument("-t", "--to", dest="to", help="JID to send message to")
+    parser.add_argument("-m", "--message", dest="message", help="message to send")
 
-    opts, args = optp.parse_args()
+    args = parser.parse_args()
 
-    logging.basicConfig(level=opts.loglevel, format='%(levelname)-8s %(message)s')
+    logging.basicConfig(level=args.loglevel, format='%(levelname)-8s %(message)s')
 
-    if opts.jid is None:
-        opts.jid = raw_input("Username: ")
-    if opts.password is None:
-        opts.password = getpass.getpass("Password: ")
-    if opts.to is None:
-        opts.to = raw_input("Send To: ")
-    if opts.message is None:
-        opts.message = raw_input("Message: ")
+    if args.jid is None:
+        args.jid = raw_input("Username: ")
+    if args.password is None:
+        args.password = getpass.getpass("Password: ")
+    if args.show_messages is False:
+        if args.to is None:
+            args.to = raw_input("Send To: ")
+        if args.message is None:
+            args.message = raw_input("Message: ")
 
-    xmpp = SendMsg(opts.jid, opts.password, opts.to, opts.message, opts.read_messages)
+    xmpp = SendMsg(args.jid, args.password, args.to, args.message, args.show_messages)
     xmpp.register_plugin('xep_0030')
     xmpp.register_plugin('xep_0199')
 
