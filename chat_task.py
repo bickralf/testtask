@@ -47,6 +47,7 @@ class MyChatTool(sleekxmpp.ClientXMPP):
         # Set switches
         self.show_unread_messages = show_unread_messages
         self.continuous = continuous
+
         # Register event handler
         self.add_event_handler("session_start", self.start)
         self.add_event_handler("message", self.message)
@@ -61,6 +62,7 @@ class MyChatTool(sleekxmpp.ClientXMPP):
         """
         self.send_presence()
         self.get_roster()
+        self.send_message(mto=self.jid, mbody="No more unread Messages\n", mtype='chat')
         if self.show_unread_messages is False:
             self.send_message(mto=self.recipient, mbody=self.msg_content, mtype='chat')
             if self.continuous is False:
@@ -72,10 +74,11 @@ class MyChatTool(sleekxmpp.ClientXMPP):
         Disconnects if continuous is not set, otherwise prints all messages
         as long as the program runs.
         """
-        from pprint import pprint
-        pprint(vars(self))
         if msg['type'] in ('chat', 'normal'):
-            print("Message: " + str(msg['body']) + "\nsent from " + str(msg['from']))
+            if self.jid in str(msg['from']):
+                print(str(msg['body']))
+            else:
+                print("Message: " + str(msg['body']) + "\nsent from " + str(msg['from']))
         if self.continuous is False:
             if self.event_queue.qsize() == 0:
                 self.disconnect(wait=True)
@@ -90,8 +93,8 @@ if __name__ == '__main__':
     parser.add_argument("-t", "--to", dest="to", help="JID to send message to")
     parser.add_argument("-m", "--message", dest="message", help="The message content")
 
-    parser.add_argument('-d', '--debug', help='Set logging to DEBUG', action='store_const', dest='loglevel', const=logging.DEBUG, default=logging.INFO)
-    parser.add_argument('-v', '--verbose', help='Set logging to VERBOSE', action='store_const', dest='loglevel', const=5, default=logging.INFO)
+    parser.add_argument('-d', '--debug', help='Set logging to DEBUG', action='store_const', dest='loglevel', const=logging.DEBUG, default=logging.ERROR)
+    parser.add_argument('-v', '--verbose', help='Set logging to VERBOSE', action='store_const', dest='loglevel', const=5, default=logging.ERROR)
     parser.add_argument('-s', '--show_unread_messages', help='Only show unread messages than log out', action='store_const', dest='show_unread_messages', const=True, default=False)
     parser.add_argument("-c", "--continuous", help="Set if program should run until you close it with control-c", action='store_const', dest="continuous", const=True, default=False)
 
