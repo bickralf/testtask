@@ -1,6 +1,7 @@
 Documentation Erasys Test Task
 ==============================
 
+
 Realtime Messaging Infrastructure
 ---------------------------------
 
@@ -120,8 +121,9 @@ Here is an example for entries to a hosts file:
 This enables you to easily access all servers from your host machine.
 
 ###Send and receive some messages
+#### RSXCC - Ridicously simple xmpp chat client
 
-You can now use the script, it uses python 2.7 and you have to install sleekxmp to make it work.
+You can now use the script `rsxcc.py`, it uses python 2.7 and you have to install sleekxmp to make it work.
 
 I chose python, because it is good to write efficient scripts that are easy to understand. Sleekxmpp seems like a good library for xmpp, that is easy to set up and use. Unfortunately the documentation is not complete and to understand certain features and functions you will have to dig into the sources.
 
@@ -137,10 +139,10 @@ For Mac it is something like:
 
 `export PYTHONPATH=/opt/local/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/site-packages`
 
-You can call the script with `--help` to get all available arguments.
+You can call the script with `<path-to-script>/rsxcc.py --help` to get all available arguments.
 
 ```
-usage: chat_task.py [-h] -j JID [-p PASSWORD] [-x XMPP_HOST] [-t TO]
+usage: rsxcc.py [-h] -j JID [-p PASSWORD] [-x XMPP_HOST] [-t TO]
                     [-m MESSAGE] [-d] [-v] [-s] [-c]
 
 optional arguments:
@@ -163,15 +165,15 @@ optional arguments:
 
 Example to send a message:
 
-`/chat_task.py -j bob@myejabberd.chatexample.com -p 12345 -x myejabberd.chatexample.com -t alice@myejabberd.chatexample.com -m 'Hi Alice'`
+`/rsxcc.py -j bob@myejabberd.chatexample.com -p 12345 -x myejabberd.chatexample.com -t alice@myejabberd.chatexample.com -m 'Hi Alice'`
 
 Example to show unread messages:
 
-`./chat_task.py -j alice@myejabberd.chatexample.com -p 12345 -x myejabberd.chatexample.com -s`
+`./rsxcc.py -j alice@myejabberd.chatexample.com -p 12345 -x myejabberd.chatexample.com -s`
 
 You don't have to specify an xmpp host, if your jid contains a valid host:
 
-`./chat_task.py -j alice@myejabberd.chatexample.com -p 12345 -s`
+`./rsxcc.py -j alice@myejabberd.chatexample.com -p 12345 -s`
 
 
 ###Some more info
@@ -210,3 +212,7 @@ Putting the `self.disconnect(wait=True)` either into the `start` or `init` metho
 
 This behaviour is due to the event based nature of sleekxmpp. I created a workaround, sending a message "No more unread Messages" to the user, so a message event is always fired and the script gets into the ´message´ method where it can then quit.
 
+###Credits
+
+Author: Ralf Bickel
+ralf.bickel@googlemail.com
