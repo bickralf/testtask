@@ -94,7 +94,9 @@ The puppet manifests are all called `site.pp` and can be found in the respective
 For this example I used simple puppet manifests. For a production environment I would set up a puppet master and install puppet agents on the 4 servers. This has the advantage, that puppet can run periodically, and therefore can make sure that services run or restart them. With a puppet master/agent approach it would also make sense to use the module structures of puppet to be able to reuse modules. Tools like Hiera and librarian/r10k should be helpful in such a scenario.
 
 https://github.com/rodjek/librarian-puppet
+
 https://github.com/puppetlabs/r10k
+
 https://docs.puppetlabs.com/hiera/latest/
 
 After machines are started, you can log in via
@@ -127,5 +129,42 @@ For Mac it is something like:
 
 `export PYTHONPATH=/opt/local/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/site-packages`
 
-Depending on your setup.
+You can call the script with `--help` to get all available arguments.
+
+```
+usage: chat_task.py [-h] -j JID [-p PASSWORD] [-x XMPP_HOST] [-t TO]
+                    [-m MESSAGE] [-d] [-v] [-s] [-c]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -j JID, --jid JID     JID to use (username@example)
+  -p PASSWORD, --password PASSWORD
+                        Password to use
+  -x XMPP_HOST, --xmpp_host XMPP_HOST
+                        Set the xmpp host to use
+  -t TO, --to TO        JID to send message to
+  -m MESSAGE, --message MESSAGE
+                        The message content
+  -d, --debug           Set logging to DEBUG
+  -v, --verbose         Set logging to VERBOSE
+  -s, --show_unread_messages
+                        Only show unread messages than log out
+  -c, --continuous      Set if program should run until you close it with
+                        control-c
+```
+
+Example to send a message:
+
+`/chat_task.py -j bob@myejabberd.chatexample.com -p 12345 -x myejabberd.chatexample.com -t alice@myejabberd.chatexample.com -m 'Hi Alice'`
+
+Example to show unread messages:
+
+`./chat_task.py -j alice@myejabberd.chatexample.com -p 12345 -x myejabberd.chatexample.com -s`
+
+You don't have to specify an xmpp host, if your jid contains a valid host:
+
+`./chat_task.py -j alice@myejabberd.chatexample.com -p 12345 -s`
+
+
+
 
