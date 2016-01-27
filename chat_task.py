@@ -109,8 +109,6 @@ if __name__ == '__main__':
         args.jid = raw_input("Username: ")
     if args.password is None:
         args.password = getpass.getpass("Password: ")
-    if args.xmpp_host is None:
-        args.xmpp_host = raw_input("XMPP Host: ")
     if args.show_unread_messages is False:
         if args.to is None:
             args.to = raw_input("Send To: ")
@@ -121,9 +119,16 @@ if __name__ == '__main__':
     xmpp.register_plugin('xep_0030')  # Service Discovery
     xmpp.register_plugin('xep_0199')  # XMPP Ping
 
-    if xmpp.connect((args.xmpp_host, 5222)):
-
-        xmpp.process(block=True)
-        print("Done")
+    if args.xmpp_host is None:
+        # Tries to connect with the server specified in the jid if no host is specified via the xmpp_host argument
+        if xmpp.connect():
+            xmpp.process(block=True)
+            print("Done")
+        else:
+            print("Unable to connect")
     else:
-        print("Unable to connect")
+        if xmpp.connect((args.xmpp_host, 5222)):
+            xmpp.process(block=True)
+            print("Done")
+        else:
+            print("Unable to connect")
