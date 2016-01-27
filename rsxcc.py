@@ -8,6 +8,8 @@ import argparse
 import sleekxmpp
 
 """
+    Author: Ralf Bickel - ralf.bickel@googlemail.com
+
     Using SleekXMPP: The Sleek XMPP Library
     Copyright (c) 2010 Nathanael C. Fritz
 
