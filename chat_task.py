@@ -13,6 +13,10 @@ import sleekxmpp
 
     http://sleekxmpp.com/
     Find source code at https://github.com/fritzy/SleekXMPP
+
+    rsxcc.py  -  ridiculously simple xmpp chat client
+
+    With this simple script you can send a message to a give jid or you can get unread messages for a jid and print them to the console.
 """
 
 
@@ -27,7 +31,7 @@ else:
     raw_input = input
 
 
-class MyChatTool(sleekxmpp.ClientXMPP):
+class SimpleChatClient(sleekxmpp.ClientXMPP):
 
     def __init__(self, jid, password, recipient, message_content, show_unread_messages, continuous):
         """
@@ -115,7 +119,7 @@ if __name__ == '__main__':
         if args.message is None:
             args.message = raw_input("Message: ")
 
-    xmpp = MyChatTool(args.jid, args.password, args.to, args.message, args.show_unread_messages, args.continuous)
+    xmpp = SimpleChatClient(args.jid, args.password, args.to, args.message, args.show_unread_messages, args.continuous)
     xmpp.register_plugin('xep_0030')  # Service Discovery
     xmpp.register_plugin('xep_0199')  # XMPP Ping
 
