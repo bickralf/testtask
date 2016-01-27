@@ -4,7 +4,7 @@ Documentation Erasys Test Task
 Realtime Messaging Infrastructure
 ---------------------------------
 
-Task
+###Task
 
 *Provide a manifest for a configuration management tool of your choice that automatically provisions a Virtualbox based VM, automatically installs a chat server and all required dependencies
 write a simple CLI
@@ -39,12 +39,12 @@ I will try both solutions to find out if my script can work with different serve
 
 I decided to just use a simple setup for prosody:
 
-*1 server with prosody and mysql installation for storage*
+    1 server with prosody and mysql installation for storage
 
 and a bit more complex setup for ejabberd:
 
-*1 server with haproxy as loadbalancer for the ejabberd cluster servers and a dns server*
-*2 servers with ejabberd using internal storage in a cluster*
+    1 server with haproxy as loadbalancer for the ejabberd cluster servers and a dns server
+    2 servers with ejabberd using internal storage in a cluster
 
 As ejabberd brings it own clustering functionality that works best with it's internal storage solution (based on mnesia), I stick to that in this example.
 
@@ -79,7 +79,7 @@ root
    ```
 
 The vagrant machines are named according to the directory names:
-````
+```
 - ejabberd
 - ejabberd_slave
 - haproxy
@@ -104,7 +104,7 @@ https://github.com/puppetlabs/r10k
 https://docs.puppetlabs.com/hiera/latest/
 
 After machines are started, you can log in via
-`vagrant ssh <machine name> e.g. ejabberd``
+`vagrant ssh <machine name> e.g. vagrant ssh ejabberd`
 
 After all machines have been started you may either edit your hosts file or set your machine to use the installed dns server.
 
@@ -174,5 +174,39 @@ You don't have to specify an xmpp host, if your jid contains a valid host:
 `./chat_task.py -j alice@myejabberd.chatexample.com -p 12345 -s`
 
 
+###Some more info
 
+This example does not take care of security! With a production xmpp infrastructure, valid and signed certifactes as well as encrypted message transportation are vital. The mysql database would need to be secured with a password for the root account, better passwords would need to be chosen (12345 is used only for simplicity here) and should not appear plain in puppet manifests.
+
+The DNS server (implemented with bind9) is necessary to get the ejabberd clustering to work. Alternatively dnsmasq can be used, but a dedicated DNS server seemed to be a better solution for me.
+
+###Problems on the way
+
+- The packages provided come with some flaws and can't always be used out of the box. It took some time to figure out why services could not be controlled or why errors occured with freshly installed packages.
+
+- The cluster feature of ejabberd does not work "out-of-the-box" if DNS is not used and the server hostnames are not similar to the erlang node names. It needed a lot of investigation to get this to run but once it is clear, what needs to be archived the whole process of clustering ejabberd works smoothly.
+
+- As sleekxmpp's documentation misses some entries, digging through the sources was necessary and took some time, to achieve the script's wanted functionality. Closing and disconnecting the application from the xmpp servers xml stream automatically, if there are no messages in the stream is a problem. The script shows unread messages and then quits. This works fine if there are any messages. But if there are no messages, the script either ran continuously or quit before messages could be fetched.
+
+If there are no messages, the script would never get into the message method:
+```
+    def message(self, msg):
+        """
+        Process all unread message stanzas of given jid.
+        Disconnects if continuous is not set, otherwise prints all messages
+        as long as the program runs.
+        """
+        if msg['type'] in ('chat', 'normal'):
+            if self.jid in str(msg['from']):
+                print(str(msg['body']))
+            else:
+                print("Message: " + str(msg['body']) + "\nsent from " + str(msg['from']))
+        if self.continuous is False:
+            if self.event_queue.qsize() == 0:
+                self.disconnect(wait=True)
+```
+
+Putting the `self.disconnect(wait=True)` either into the `start` or `init` method would prevent the script from printing out any unread messages.
+
+This behaviour is due to the event based nature of sleekxmpp. I created a workaround, sending a message "No more unread Messages" to the user, so a message event is always fired and the script gets into the ´message´ method where it can then quit.
 
