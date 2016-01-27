@@ -4,7 +4,7 @@ Documentation Erasys Test Task
 Realtime Messaging Infrastructure
 ---------------------------------
 
-Task:
+Task
 
 *Provide a manifest for a configuration management tool of your choice that automatically provisions a Virtualbox based VM, automatically installs a chat server and all required dependencies
 write a simple CLI
@@ -17,7 +17,7 @@ Implement these commands:
 - send a message to a given user*
 
 
-First step:
+###First step
 
 Gather some information about chat servers and requirements
 
@@ -43,12 +43,14 @@ I decided to just use a simple setup for prosody:
 
 and a bit more complex setup for ejabberd:
 
-1 server with haproxy as loadbalancer for the ejabberd cluster servers and a dns server
-2 servers with ejabberd using internal storage in a cluster
+*1 server with haproxy as loadbalancer for the ejabberd cluster servers and a dns server*
+*2 servers with ejabberd using internal storage in a cluster*
 
 As ejabberd brings it own clustering functionality that works best with it's internal storage solution (based on mnesia), I stick to that in this example.
 
-Directory structure:
+I use haproxy for loadbalancing between the two servers in the ejabberd clusters to have one "interface". So if I want to connect to the servers I can just use one address, the address from the loadbalancer. The load is balanced equally on the two servers. With the clustering feature both servers communicate with each other via s2s (server-to-server) and exchange data.
+
+###Directory structure:
 
 ```
 root
@@ -57,19 +59,19 @@ root
     +-- documentation.md     - this documentation
     +-- ejabberd             
         |
-        +-- files             - all files used for provisioning ejabberd
+        +-- files             - all files used for provisioning ejabberd, especially config files
         +-- manifests         - a single puppet manifest for provisioning ejabberd
     +-- ejabberd_slave
         |
-        +-- files             - all files used for provisioning ejabberd slave
+        +-- files             - all files used for provisioning ejabberd slave, especially config files
         +-- manifests         - a single puppet manifest for provisioning ejabberd slave
     +-- haproxy
         |
-        +-- files             - all files used for provisioning haproxy
+        +-- files             - all files used for provisioning haproxy, especially config files
         +-- manifests         - a single puppet manifest for provisioning haproxy
     +-- prosody
         |
-        +-- files             - all files used for provisioning prosody
+        +-- files             - all files used for provisioning prosody, especially config files
         +-- manifests         - a single puppet manifest for provisioning prosody
     +-- scripts
         |
@@ -83,6 +85,8 @@ The vagrant machines are named according to the directory names:
 - haproxy
 - prosody
 ```
+
+###Getting started
 
 It is important to start the ejabberd before the ejabberd_slave, as the erlang cookie needs to be copied from ejabberd to ejabberd_slave!
 
@@ -115,13 +119,17 @@ Here is an example for entries to a hosts file:
 
 This enables you to easily access all servers from your host machine.
 
+###Send and receive some messages
+
 You can now use the script, it uses python 2.7 and you have to install sleekxmp to make it work.
+
+I chose python, because it is good to write efficient scripts that are easy to understand. Sleekxmpp seems like a good library for xmpp, that is easy to set up and use. Unfortunately the documentation is not complete and to understand certain features and functions you will have to dig into the sources.
 
 http://sleekxmpp.com/
 
 You'll need `python-pip` to install it via
 
-`pip install sleekxmpp``
+`pip install sleekxmpp`
 
 You may also need to set PYTHONPATH to the path were all python modules are installed.
 
