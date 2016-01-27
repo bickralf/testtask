@@ -37,14 +37,41 @@ I will try both.
 
 ###Setup
 
-I decided to just use a simple setup:
+I decided to just use a simple setup for prosody:
 
-1 server with prosody and mysql installation 
-1 server with ejabberd using internal storage
+*1 server with prosody and mysql installation for storage*
 
-optional:
-1 server with haproxy as loadbalancer for several ejabberd instance
-1 server with ejabberd for clustering
+and a bit more complex setup for ejabberd:
 
-The storage method can be changed according to the needs. I decided to use mysql for prosody just to use something different than the internal storage for this example. 
+1 server with haproxy as loadbalancer for the ejabberd cluster servers and a dns server
+2 servers with ejabberd using internal storage in a cluster
 
+As ejabberd brings it own clustering functionality that works best with it's internal storage solution (based on mnesia), I stick to that in this example.
+
+The zip file contains a VagrantFile, a directory for all servers and a directory containing the script:
+
+```
+root
+|
++-- Vagrantfile          - the Vagrantfile containing definitions for all 4 servers
+    +-- documentation.md     - this documentation
+    +-- ejabberd             
+        |
+        +-- files             - all files used for provisioning ejabberd
+        +-- manifests         - a single puppet manifest for provisioning ejabberd
+    +-- ejabberd_slave
+        |
+        +-- files             - all files used for provisioning ejabberd slave
+        +-- manifests         - a single puppet manifest for provisioning ejabberd slave
+    +-- haproxy
+        |
+        +-- files             - all files used for provisioning haproxy
+        +-- manifests         - a single puppet manifest for provisioning haproxy
+    +-- prosody
+        |
+        +-- files             - all files used for provisioning prosody
+        +-- manifests         - a single puppet manifest for provisioning prosody
+    +-- scripts
+        |
+        +-- chat_task.py      - python script to send messages and show unread messages
+   ```
